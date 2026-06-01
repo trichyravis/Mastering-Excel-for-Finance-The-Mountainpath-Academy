@@ -1,3 +1,4 @@
+
 """
 The Mountain Path Academy — Finance Excel Functions Dashboard
 Searchable & filterable reference for financial analysts
@@ -16,7 +17,8 @@ st.set_page_config(
 )
 
 # ─── BRANDING & CSS ───────────────────────────────────────────────────────────
-st.markdown("""
+# st.html() is required for Streamlit ≥ 1.36 — unsafe_allow_html is deprecated
+st.html("""
 <style>
 /* ── Google Fonts ── */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap');
@@ -218,7 +220,7 @@ div[data-testid="stTextInput"] input:focus {
     box-shadow: 0 0 0 3px rgba(200,150,46,0.15) !important;
 }
 </style>
-""", unsafe_allow_html=True)
+""")
 
 
 # ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -794,7 +796,7 @@ df = pd.DataFrame(FUNCTIONS)
 
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("""
+    st.html("""
     <div style='text-align:center; padding: 20px 0 12px 0;'>
         <div style='font-size:2rem;'>⛰️</div>
         <div style='font-family:"Playfair Display",serif; font-size:1.1rem; color:#E8B84B; font-weight:700; margin-top:4px;'>
@@ -805,38 +807,38 @@ with st.sidebar:
         </div>
     </div>
     <hr style='border-color:#2C3E6B; margin:4px 0 16px 0;'>
-    """, unsafe_allow_html=True)
+    """)
 
-    st.markdown("### 🔍 Search")
+    st.markdown("###  Search")
     search_query = st.text_input(
         "Function name or keyword",
         placeholder="e.g. XNPV, depreciation, IRR…",
         label_visibility="collapsed",
     )
 
-    st.markdown("### 📂 Category")
+    st.markdown("###  Category")
     categories = ["All"] + sorted(df["category"].unique().tolist())
     selected_cat = st.selectbox("Category", categories, label_visibility="collapsed")
 
-    st.markdown("### 🎯 Difficulty")
+    st.markdown("###  Difficulty")
     difficulty_opts = ["All", "Beginner", "Intermediate", "Advanced"]
     selected_diff = st.selectbox("Difficulty", difficulty_opts, label_visibility="collapsed")
 
-    st.markdown("### 🏢 Model Application")
+    st.markdown("###  Model Application")
     app_opts = ["All", "FP&A", "Valuations", "Reporting"]
     selected_app = st.selectbox("Application", app_opts, label_visibility="collapsed")
 
-    st.markdown("""
+    st.html("""
     <hr style='border-color:#2C3E6B; margin:16px 0;'>
     <div style='font-size:0.72rem; color:#6A7A9B; line-height:1.6;'>
         <strong style='color:#E8B84B;'>Difficulty guide</strong><br>
-        🟢 Beginner — no prior formula knowledge needed<br>
-        🟡 Intermediate — comfortable with basic Excel<br>
-        🔴 Advanced — financial modelling experience required<br><br>
+         Beginner — no prior formula knowledge needed<br>
+         Intermediate — comfortable with basic Excel<br>
+         Advanced — financial modelling experience required<br><br>
         <strong style='color:#E8B84B;'>Prof. V. Ravichandran</strong><br>
         28+ years corporate finance &amp; banking
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # ─── FILTERING ────────────────────────────────────────────────────────────────
 filtered = df.copy()
@@ -860,7 +862,7 @@ if selected_app != "All":
     filtered = filtered[filtered["applications"].apply(lambda apps: selected_app in apps)]
 
 # ─── HERO ─────────────────────────────────────────────────────────────────────
-st.markdown("""
+st.html("""
 <div class="hero">
     <h1>⛰️ Excel Finance Functions Reference</h1>
     <p>
@@ -869,34 +871,34 @@ st.markdown("""
         Curated by <span class="gold">Prof. V. Ravichandran</span> · themountainpathacademy.com
     </p>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # ─── STAT CHIPS ───────────────────────────────────────────────────────────────
 total = len(df)
 shown = len(filtered)
 cats  = df["category"].nunique()
 
-st.markdown(f"""
+st.html(f"""
 <div class="stat-row">
     <div class="stat-chip"><span>{total}</span> Total Functions</div>
     <div class="stat-chip"><span>{cats}</span> Categories</div>
     <div class="stat-chip"><span>{shown}</span> Showing Now</div>
     <div class="stat-chip"><span>3</span> Model Types</div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # ─── RESULTS ──────────────────────────────────────────────────────────────────
-DIFF_EMOJI = {"Beginner": "🟢", "Intermediate": "🟡", "Advanced": "🔴"}
+DIFF_EMOJI = {"Beginner": "", "Intermediate": "", "Advanced": ""}
 APP_COLOUR  = {"FP&A": "#1565C0", "Valuations": "#880E4F", "Reporting": "#2E7D32"}
 
 if filtered.empty:
-    st.markdown("""
+    st.html("""
     <div class="no-result">
-        <div class="icon">🔍</div>
+        <div class="icon"></div>
         <strong>No functions matched your filters.</strong><br>
         Try a broader search term or clear one of the filters.
     </div>
-    """, unsafe_allow_html=True)
+    """)
 else:
     # Group by category for display
     for cat in ["Core Math", "Conditional", "Lookup", "Date & Time", "Financial",
@@ -905,7 +907,7 @@ else:
         if group.empty:
             continue
 
-        st.markdown(f'<div class="section-header">📌 {cat}</div>', unsafe_allow_html=True)
+        st.html(f'<div class="section-header"> {cat}</div>')
 
         for _, row in group.iterrows():
             diff_badge = f'<span class="cat-badge diff-{row["difficulty"]}">{DIFF_EMOJI[row["difficulty"]]} {row["difficulty"]}</span>'
@@ -915,7 +917,7 @@ else:
             )
             cat_badge  = f'<span class="cat-badge cat-{cat}">{cat}</span>'
 
-            st.markdown(f"""
+            st.html(f"""
 <div class="fn-card">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
         <div class="fn-name">{row['name']}</div>
@@ -929,7 +931,7 @@ else:
 
     <div class="fn-desc">{row['description']}</div>
 
-    <div class="fn-label">💼 Real-World Use Case</div>
+    <div class="fn-label"> Real-World Use Case</div>
     <div class="fn-usecase">{row['use_case']}</div>
 
     <div class="fn-label">⚠️ Error Avoidance Tip</div>
@@ -937,13 +939,13 @@ else:
 
     <div class="fn-tags" style="margin-top:14px;">{app_tags}</div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # ─── FOOTER ───────────────────────────────────────────────────────────────────
-st.markdown("""
+st.html("""
 <div class="footer">
     © 2026 <a href="https://themountainpathacademy.com" target="_blank">The Mountain Path Academy</a> ·
     Prof. V. Ravichandran · All rights reserved<br>
     Practitioner-led finance courses in Financial Modelling, Risk Management, Derivatives & Valuation
 </div>
-""", unsafe_allow_html=True)
+""")
