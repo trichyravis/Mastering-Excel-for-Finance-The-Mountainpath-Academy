@@ -220,20 +220,34 @@ div[data-testid="stTextInput"] input:focus {
     border-color: var(--gold) !important;
     box-shadow: 0 0 0 3px rgba(200,150,46,0.15) !important;
 }
-/* ── Sidebar search input — fix invisible text on dark bg ── */
+/* ── Sidebar search input — multi-selector fix for Streamlit 1.5x ── */
+/* Chrome uses -webkit-text-fill-color which overrides color on inputs  */
+section[data-testid="stSidebar"] input,
+section[data-testid="stSidebar"] input[type="text"],
+section[data-testid="stSidebar"] input[type="search"],
+section[data-testid="stSidebar"] .stTextInput input,
+section[data-testid="stSidebar"] [data-testid="stTextInput"] input,
 section[data-testid="stSidebar"] div[data-testid="stTextInput"] input {
-    background: rgba(255,255,255,0.10) !important;
+    background: #1A3060 !important;
     color: #FFFFFF !important;
-    border: 1.5px solid rgba(232,184,75,0.4) !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    border: 1.5px solid rgba(232,184,75,0.5) !important;
+    border-radius: 8px !important;
     caret-color: #E8B84B !important;
+    opacity: 1 !important;
 }
-section[data-testid="stSidebar"] div[data-testid="stTextInput"] input::placeholder {
-    color: rgba(255,255,255,0.40) !important;
+section[data-testid="stSidebar"] input::placeholder,
+section[data-testid="stSidebar"] input[type="text"]::placeholder,
+section[data-testid="stSidebar"] [data-testid="stTextInput"] input::placeholder {
+    color: rgba(255,255,255,0.38) !important;
+    -webkit-text-fill-color: rgba(255,255,255,0.38) !important;
 }
-section[data-testid="stSidebar"] div[data-testid="stTextInput"] input:focus {
-    background: rgba(255,255,255,0.15) !important;
-    border-color: var(--gold-lt) !important;
-    box-shadow: 0 0 0 3px rgba(232,184,75,0.18) !important;
+section[data-testid="stSidebar"] input:focus,
+section[data-testid="stSidebar"] [data-testid="stTextInput"] input:focus {
+    background: #1E3A70 !important;
+    border-color: #E8B84B !important;
+    box-shadow: 0 0 0 2px rgba(232,184,75,0.25) !important;
+    outline: none !important;
 }
 /* ── Sidebar profile links ── */
 .profile-links { display:flex; gap:12px; justify-content:center; margin-top:12px; }
