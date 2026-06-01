@@ -207,17 +207,64 @@ section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3 { color
 }
 .footer a { color: var(--gold); text-decoration: none; }
 
-/* ── Streamlit overrides ── */
+/* ── Streamlit overrides — main area ── */
 div[data-testid="stTextInput"] input {
     border-radius: 10px !important;
     border: 1.5px solid var(--border) !important;
     padding: 10px 14px !important;
     font-size: 0.95rem !important;
     background: var(--white) !important;
+    color: var(--text) !important;
 }
 div[data-testid="stTextInput"] input:focus {
     border-color: var(--gold) !important;
     box-shadow: 0 0 0 3px rgba(200,150,46,0.15) !important;
+}
+/* ── Sidebar search input — fix invisible text on dark bg ── */
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] input {
+    background: rgba(255,255,255,0.10) !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid rgba(232,184,75,0.4) !important;
+    caret-color: #E8B84B !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] input::placeholder {
+    color: rgba(255,255,255,0.40) !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] input:focus {
+    background: rgba(255,255,255,0.15) !important;
+    border-color: var(--gold-lt) !important;
+    box-shadow: 0 0 0 3px rgba(232,184,75,0.18) !important;
+}
+/* ── Sidebar profile links ── */
+.profile-links { display:flex; gap:12px; justify-content:center; margin-top:12px; }
+.profile-link {
+    display:inline-flex; align-items:center; gap:6px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(232,184,75,0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #E8B84B !important;
+    text-decoration: none !important;
+    transition: background 0.2s;
+}
+.profile-link:hover { background: rgba(232,184,75,0.18) !important; }
+/* ── Category icon strip ── */
+.cat-icon-row {
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;
+}
+.cat-icon-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    background: var(--white);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:7px 14px;
+    font-size:0.78rem;
+    font-weight:600;
+    color: var(--navy);
+    box-shadow:0 1px 4px rgba(0,0,0,0.06);
+    cursor:pointer;
 }
 </style>
 """)
@@ -830,13 +877,32 @@ with st.sidebar:
 
     st.html("""
     <hr style='border-color:#2C3E6B; margin:16px 0;'>
-    <div style='font-size:0.72rem; color:#6A7A9B; line-height:1.6;'>
+    <div style='font-size:0.72rem; color:#6A7A9B; line-height:1.8;'>
         <strong style='color:#E8B84B;'>Difficulty guide</strong><br>
          Beginner — no prior formula knowledge needed<br>
          Intermediate — comfortable with basic Excel<br>
-         Advanced — financial modelling experience required<br><br>
-        <strong style='color:#E8B84B;'>Prof. V. Ravichandran</strong><br>
-        28+ years corporate finance &amp; banking
+         Advanced — financial modelling experience required
+    </div>
+    <hr style='border-color:#2C3E6B; margin:14px 0;'>
+    <div style='text-align:center;'>
+        <div style='font-size:0.78rem; color:#E8B84B; font-weight:700; margin-bottom:4px;'>Prof. V. Ravichandran</div>
+        <div style='font-size:0.68rem; color:#6A7A9B; margin-bottom:10px;'>28+ yrs · Corporate Finance &amp; Banking</div>
+        <div style='display:flex; gap:8px; justify-content:center; flex-wrap:wrap;'>
+            <a style='display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.07);border:1px solid rgba(232,184,75,0.35);border-radius:20px;padding:5px 12px;font-size:0.70rem;font-weight:600;color:#E8B84B;text-decoration:none;'
+               href='https://www.linkedin.com/in/trichyravis' target='_blank'>
+                <svg width='11' height='11' viewBox='0 0 24 24' fill='#E8B84B'>
+                    <path d='M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z'/>
+                </svg>
+                LinkedIn
+            </a>
+            <a style='display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.07);border:1px solid rgba(232,184,75,0.35);border-radius:20px;padding:5px 12px;font-size:0.70rem;font-weight:600;color:#E8B84B;text-decoration:none;'
+               href='https://github.com/trichyravis' target='_blank'>
+                <svg width='11' height='11' viewBox='0 0 24 24' fill='#E8B84B'>
+                    <path d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/>
+                </svg>
+                GitHub
+            </a>
+        </div>
     </div>
     """)
 
@@ -884,6 +950,46 @@ st.html(f"""
     <div class="stat-chip"><span>{cats}</span> Categories</div>
     <div class="stat-chip"><span>{shown}</span> Showing Now</div>
     <div class="stat-chip"><span>3</span> Model Types</div>
+</div>
+""")
+
+# ─── CATEGORY ILLUSTRATION STRIP ─────────────────────────────────────────────
+CAT_ICONS = {
+    "Core Math":      ("➕", "#EBF5FF", "#1565C0"),
+    "Conditional":    ("", "#FFF3E0", "#E65100"),
+    "Lookup":         ("", "#F3E5F5", "#6A1B9A"),
+    "Date & Time":    ("", "#E8F5E9", "#1B5E20"),
+    "Financial":      ("", "#FCE4EC", "#880E4F"),
+    "Statistical":    ("", "#E0F2F1", "#004D40"),
+    "Text":           ("", "#FFF9C4", "#827717"),
+    "Dynamic Arrays": ("⚡", "#E8EAF6", "#283593"),
+    "Error & Info":   ("️", "#FFEBEE", "#B71C1C"),
+    "Math Extras":    ("", "#F1F8E9", "#33691E"),
+    "Info & Cell":    ("", "#E0F7FA", "#006064"),
+}
+
+icon_chips = "".join(
+    f'''<div style="display:inline-flex;align-items:center;gap:6px;background:{bg};
+        border:1px solid {col}33;border-radius:10px;padding:7px 13px;
+        font-size:0.78rem;font-weight:600;color:{col};white-space:nowrap;
+        box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+        <span style="font-size:1rem;">{icon}</span>{cat}
+        <span style="background:{col};color:#fff;border-radius:10px;
+              padding:0 6px;font-size:0.65rem;margin-left:2px;">
+            {len(df[df["category"]==cat])}
+        </span>
+    </div>'''
+    for cat, (icon, bg, col) in CAT_ICONS.items()
+)
+st.html(f"""
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;
+     background:#fff;border-radius:12px;border:1px solid #DDE2ED;
+     box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+  <div style="width:100%;font-size:0.72rem;font-weight:700;color:#8A94AB;
+       text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">
+     Browse by Category
+  </div>
+  {icon_chips}
 </div>
 """)
 
