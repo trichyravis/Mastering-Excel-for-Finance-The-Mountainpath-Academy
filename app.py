@@ -7,6 +7,10 @@ Prof. V. Ravichandran | themountainpathacademy.com
 
 import streamlit as st
 import pandas as pd
+import io
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 # ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -855,6 +859,161 @@ FUNCTIONS = [
 
 df = pd.DataFrame(FUNCTIONS)
 
+# ─── SHEET / CATEGORY MAPPING ─────────────────────────────────────────────────
+ALL_CATS = ["Core Math","Conditional","Lookup","Date & Time","Financial",
+            "Statistical","Text","Dynamic Arrays","Error & Info","Math Extras","Info & Cell"]
+
+CAT_TO_SHEET = {
+    "Core Math":      "Core Math",
+    "Conditional":    "Conditional Analysis",
+    "Lookup":         "Lookup & Reference",
+    "Date & Time":    "Date & Time",
+    "Financial":      "Financial Modeling",
+    "Statistical":    "Statistical",
+    "Text":           "Text",
+    "Dynamic Arrays": "Dynamic Arrays",
+    "Error & Info":   "Error & Info",
+    "Math Extras":    "Math Extras",
+    "Info & Cell":    "Information & Cell",
+}
+
+# ─── EXCEL GENERATOR ──────────────────────────────────────────────────────────
+def generate_excel(selected_cats: list) -> bytes:
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    # ── Palette ──
+    NAVY    = "0D1B3E"
+    GOLD    = "C8962E"
+    SLATE   = "2C3E6B"
+    CREAM   = "F8F5EF"
+    WHITE   = "FFFFFF"
+    MUTED   = "8A94AB"
+    DIFF_FILL = {"Beginner": "E8F5E9", "Intermediate": "FFF3E0", "Advanced": "FCE4EC"}
+    DIFF_FONT = {"Beginner": "2E7D32", "Intermediate": "E65100", "Advanced": "880E4F"}
+
+    hdr_font  = Font(name="Calibri", bold=True, color=WHITE, size=10)
+    hdr_fill  = PatternFill(fill_type="solid", fgColor=NAVY)
+    hdr_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    thin = Side(style="thin", color="DDE2ED")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    def apply_header(ws, row, cols):
+        for c, val in enumerate(cols, 1):
+            cell = ws.cell(row=row, column=c, value=val)
+            cell.font = hdr_font
+            cell.fill = hdr_fill
+            cell.alignment = hdr_align
+            cell.border = border
+        ws.row_dimensions[row].height = 28
+
+    # ── Contents sheet ──
+    wc = wb.create_sheet(" Contents")
+    wc.sheet_view.showGridLines = False
+    wc.column_dimensions["A"].width = 4
+
+    wc["B2"] = "⛰️  The Mountain Path Academy"
+    wc["B2"].font = Font(name="Calibri", bold=True, size=16, color=NAVY)
+    wc.row_dimensions[2].height = 26
+
+    wc["B3"] = "Excel Finance Functions — Downloadable Reference"
+    wc["B3"].font = Font(name="Calibri", size=12, color=SLATE)
+    wc.row_dimensions[3].height = 18
+
+    wc["B4"] = "Prof. V. Ravichandran  |  themountainpathacademy.com  |  github.com/trichyravis"
+    wc["B4"].font = Font(name="Calibri", size=9, italic=True, color=MUTED)
+    wc.row_dimensions[4].height = 14
+
+    apply_header(wc, 6, ["#", "Category / Sheet", "Functions Included", "Count"])
+    wc.column_dimensions["B"].width = 5
+    wc.column_dimensions["C"].width = 26
+    wc.column_dimensions["D"].width = 68
+    wc.column_dimensions["E"].width = 8
+
+    for i, cat in enumerate(selected_cats, 1):
+        cat_fns = [f for f in FUNCTIONS if f["category"] == cat]
+        r = i + 6
+        wc.cell(r, 2, i).alignment = Alignment(horizontal="center")
+        wc.cell(r, 3, CAT_TO_SHEET.get(cat, cat)).font = Font(name="Calibri", bold=True, color=SLATE)
+        wc.cell(r, 4, "  ·  ".join(f["name"] for f in cat_fns))
+        wc.cell(r, 5, len(cat_fns)).alignment = Alignment(horizontal="center")
+        bg = CREAM if i % 2 == 0 else WHITE
+        for col in [2, 3, 4, 5]:
+            wc.cell(r, col).fill = PatternFill(fill_type="solid", fgColor=bg)
+            wc.cell(r, col).border = border
+            wc.cell(r, col).alignment = Alignment(vertical="center", wrap_text=True)
+        wc.row_dimensions[r].height = 18
+
+    # ── One sheet per category ──
+    HEADERS = ["Function", "Syntax", "Description", "Difficulty",
+               "Model Application", "Real-World Use Case", "⚠️ Error Avoidance Tip"]
+    COL_W   = [20, 36, 36, 14, 20, 50, 50]
+
+    for cat in selected_cats:
+        cat_fns = [f for f in FUNCTIONS if f["category"] == cat]
+        sheet_nm = CAT_TO_SHEET.get(cat, cat)[:31]
+        ws = wb.create_sheet(sheet_nm)
+        ws.sheet_view.showGridLines = False
+
+        # Title row
+        ws["A1"] = f"⛰️  {sheet_nm}  —  Excel Finance Functions"
+        ws["A1"].font = Font(name="Calibri", bold=True, size=13, color=NAVY)
+        ws.row_dimensions[1].height = 22
+        ws["A2"] = "The Mountain Path Academy  |  Prof. V. Ravichandran  |  themountainpathacademy.com"
+        ws["A2"].font = Font(name="Calibri", size=9, italic=True, color=MUTED)
+        ws.row_dimensions[2].height = 13
+
+        # Header
+        apply_header(ws, 4, HEADERS)
+        for i, w in enumerate(COL_W, 1):
+            ws.column_dimensions[get_column_letter(i)].width = w
+
+        # Data
+        for ri, fn in enumerate(cat_fns, 5):
+            alt = CREAM if ri % 2 == 0 else WHITE
+            vals = [fn["name"], fn["syntax"], fn["description"], fn["difficulty"],
+                    " | ".join(fn["applications"]), fn["use_case"], fn["tip"]]
+
+            for ci, val in enumerate(vals, 1):
+                cell = ws.cell(ri, ci, str(val) if val is not None else "")
+                cell.border = border
+                cell.alignment = Alignment(vertical="top", wrap_text=True)
+
+                if ci == 1:   # Function name
+                    cell.font = Font(name="Calibri", bold=True, size=11, color=NAVY)
+                    cell.fill = PatternFill(fill_type="solid", fgColor=alt)
+                elif ci == 2: # Syntax
+                    cell.font = Font(name="Courier New", size=9, color=SLATE)
+                    cell.fill = PatternFill(fill_type="solid", fgColor="EEF1F8")
+                elif ci == 4: # Difficulty
+                    dc = fn["difficulty"]
+                    cell.font = Font(name="Calibri", bold=True, size=9,
+                                     color=DIFF_FONT.get(dc, "000000"))
+                    cell.fill = PatternFill(fill_type="solid",
+                                            fgColor=DIFF_FILL.get(dc, alt))
+                    cell.alignment = Alignment(horizontal="center", vertical="top",
+                                               wrap_text=True)
+                elif ci == 6: # Use case
+                    cell.font = Font(name="Calibri", size=9, color=SLATE)
+                    cell.fill = PatternFill(fill_type="solid", fgColor="F0F4FF")
+                elif ci == 7: # Tip
+                    cell.font = Font(name="Calibri", size=9, color="5D4037")
+                    cell.fill = PatternFill(fill_type="solid", fgColor="FFFDE7")
+                else:
+                    cell.font = Font(name="Calibri", size=9)
+                    cell.fill = PatternFill(fill_type="solid", fgColor=alt)
+
+            ws.row_dimensions[ri].height = 58
+
+        ws.freeze_panes = "A5"
+        ws.auto_filter.ref = f"A4:{get_column_letter(len(HEADERS))}{4+len(cat_fns)}"
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.html("""
@@ -888,6 +1047,29 @@ with st.sidebar:
     st.markdown("###  Model Application")
     app_opts = ["All", "FP&A", "Valuations", "Reporting"]
     selected_app = st.selectbox("Application", app_opts, label_visibility="collapsed")
+
+    # ── Download section ──
+    st.html("<hr style='border-color:#2C3E6B; margin:16px 0 10px 0;'>")
+    st.markdown("###  Download Sheets")
+    dl_opts = ["All Sheets"] + ALL_CATS
+    dl_selection = st.multiselect(
+        "Pick sheets",
+        options=dl_opts,
+        default=["All Sheets"],
+        label_visibility="collapsed",
+    )
+    dl_cats = ALL_CATS if "All Sheets" in dl_selection else [c for c in ALL_CATS if c in dl_selection]
+    if dl_cats:
+        excel_bytes = generate_excel(dl_cats)
+        fname = "MPA_Finance_Functions_All.xlsx" if len(dl_cats) == len(ALL_CATS) \
+                else f"MPA_{dl_cats[0].replace(' ','_')}.xlsx"
+        st.download_button(
+            label=f"⬇️ Download  ({len(dl_cats)} sheet{'s' if len(dl_cats)>1 else ''})",
+            data=excel_bytes,
+            file_name=fname,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+        )
 
     st.html("""
     <hr style='border-color:#2C3E6B; margin:16px 0;'>
