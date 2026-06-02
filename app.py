@@ -249,6 +249,51 @@ section[data-testid="stSidebar"] [data-testid="stTextInput"] input:focus {
     box-shadow: 0 0 0 2px rgba(232,184,75,0.25) !important;
     outline: none !important;
 }
+/* ── Sidebar selectbox — BaseWeb component targeting ── */
+/* Container / trigger button */
+section[data-testid="stSidebar"] [data-baseweb="select"] > div:first-child,
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div:first-child {
+    background-color: #1A3060 !important;
+    border: 1.5px solid rgba(232,184,75,0.45) !important;
+    border-radius: 8px !important;
+}
+/* Selected value text — BaseWeb uses deeply nested spans */
+section[data-testid="stSidebar"] [data-baseweb="select"] span,
+section[data-testid="stSidebar"] [data-baseweb="select"] div[class*="placeholder"],
+section[data-testid="stSidebar"] [data-baseweb="select"] div[class*="singleValue"],
+section[data-testid="stSidebar"] [data-baseweb="select"] div[class*="value"],
+section[data-testid="stSidebar"] [data-baseweb="select"] [class*="Value"],
+section[data-testid="stSidebar"] .stSelectbox div[role="button"],
+section[data-testid="stSidebar"] .stSelectbox div[role="combobox"] {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+/* Dropdown arrow SVG */
+section[data-testid="stSidebar"] [data-baseweb="select"] svg {
+    fill: #E8B84B !important;
+    color: #E8B84B !important;
+}
+/* Focus state */
+section[data-testid="stSidebar"] [data-baseweb="select"]:focus-within > div:first-child {
+    border-color: #E8B84B !important;
+    box-shadow: 0 0 0 2px rgba(232,184,75,0.25) !important;
+}
+/* Options list (when open) */
+ul[data-testid="stSelectboxVirtualDropdown"],
+[data-baseweb="menu"] ul,
+[data-baseweb="popover"] ul {
+    background: #FFFFFF !important;
+}
+[data-baseweb="menu"] li,
+[data-baseweb="popover"] li,
+ul[data-testid="stSelectboxVirtualDropdown"] li {
+    color: #0D1B3E !important;
+    -webkit-text-fill-color: #0D1B3E !important;
+}
+[data-baseweb="menu"] li:hover,
+[data-baseweb="popover"] li:hover {
+    background: #EEF1F8 !important;
+}
 /* ── Sidebar profile links ── */
 .profile-links { display:flex; gap:12px; justify-content:center; margin-top:12px; }
 .profile-link {
