@@ -98,6 +98,7 @@ section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3 { color
 .cat-Date\ &\ Time     { background:#E8F5E9; color:#1B5E20; }
 .cat-Financial         { background:#FCE4EC; color:#880E4F; }
 .cat-Statistical       { background:#E0F2F1; color:#004D40; }
+.cat-Simulation        { background:#EDE7F6; color:#4527A0; }
 .cat-Text              { background:#FFF9C4; color:#827717; }
 .cat-Dynamic\ Arrays   { background:#E8EAF6; color:#283593; }
 .cat-Error\ &\ Info    { background:#FFEBEE; color:#B71C1C; }
@@ -785,6 +786,48 @@ FUNCTIONS = [
         "applications": ["FP&A", "Valuations"],
     },
 
+    # ── SIMULATION & RANDOM ──
+    {
+        "name": "RAND", "category": "Simulation", "difficulty": "Beginner",
+        "syntax": "=RAND()",
+        "description": "Returns a uniformly distributed random decimal between 0 (inclusive) and 1 (exclusive). Recalculates on every worksheet change.",
+        "use_case": "Risk: Drive Monte Carlo simulations — generate thousands of random uniform draws to model uncertain inputs like commodity prices or FX rates across scenarios.",
+        "tip": "⚠️ RAND() is volatile — it recalculates every time anything changes in the workbook. To freeze a value, copy → Paste Special → Values. Never reference RAND() from multiple cells expecting the same draw.",
+        "applications": ["Valuations", "FP&A"],
+    },
+    {
+        "name": "RANDBETWEEN", "category": "Simulation", "difficulty": "Beginner",
+        "syntax": "=RANDBETWEEN(bottom, top)",
+        "description": "Returns a random integer between two bounds (inclusive). Recalculates on every change.",
+        "use_case": "FP&A: Generate random scenario indices for stress testing; sample random deal sizes or transaction counts for operational model testing.",
+        "tip": "⚠️ Like RAND(), it is volatile. For reproducible results, seed your simulation by fixing values with Paste Special → Values before analysis.",
+        "applications": ["FP&A", "Valuations"],
+    },
+    {
+        "name": "RANDARRAY", "category": "Simulation", "difficulty": "Intermediate",
+        "syntax": "=RANDARRAY(rows, cols, min, max, integer)",
+        "description": "Spills an array of random numbers across a specified grid. Supports decimal or integer output and custom min/max bounds. Requires Excel 365.",
+        "use_case": "Risk: Generate a full Monte Carlo simulation grid in one formula — e.g. =RANDARRAY(1000, 5, 0, 1) produces 1,000 scenarios × 5 risk factors instantly.",
+        "tip": "⚠️ Set integer=TRUE for discrete draws. Leave adjacent cells empty for the spill range. Wrap in LET() to reference the same random array multiple times without re-drawing.",
+        "applications": ["Valuations", "FP&A"],
+    },
+    {
+        "name": "Scaled RAND", "category": "Simulation", "difficulty": "Beginner",
+        "syntax": "=min + (max - min) * RAND()",
+        "description": "Scales a RAND() draw to any continuous range [min, max]. This is a formula pattern, not a built-in function.",
+        "use_case": "Risk: Model uniformly distributed uncertain inputs — e.g. a discount rate between 8% and 14%: =8% + (14%-8%) * RAND(); or a bid price between two bounds in an M&A scenario.",
+        "tip": "⚠️ For non-uniform distributions (e.g. triangular, lognormal) combine RAND() with the appropriate inverse CDF (NORM.INV, LOGNORM.INV) rather than scaling directly.",
+        "applications": ["Valuations", "FP&A"],
+    },
+    {
+        "name": "NORM.INV(RAND())", "category": "Simulation", "difficulty": "Advanced",
+        "syntax": "=NORM.INV(RAND(), mean, standard_dev)",
+        "description": "Combines inverse normal transform with a uniform random draw to produce a random sample from any normal distribution — the standard technique for Monte Carlo simulation of normally distributed variables.",
+        "use_case": "Risk: Simulate 10,000 paths of an equity price or portfolio return assuming normality; model random revenue draws around a forecast mean with analyst-estimated standard deviation for scenario analysis.",
+        "tip": "⚠️ Each recalculation produces a different draw — freeze results before analysis. For correlated variables (e.g. equity + FX) use the Cholesky decomposition on a matrix of NORM.INV(RAND()) draws.",
+        "applications": ["Valuations", "FP&A"],
+    },
+
     # ── TEXT ──
     {
         "name": "TRIM / LEN", "category": "Text", "difficulty": "Beginner",
@@ -984,7 +1027,7 @@ df = pd.DataFrame(FUNCTIONS)
 
 # ─── SHEET / CATEGORY MAPPING ─────────────────────────────────────────────────
 ALL_CATS = ["Core Math","Conditional","Lookup","Date & Time","Financial",
-            "Statistical","Text","Dynamic Arrays","Error & Info","Math Extras","Info & Cell"]
+            "Statistical","Simulation","Text","Dynamic Arrays","Error & Info","Math Extras","Info & Cell"]
 
 CAT_TO_SHEET = {
     "Core Math":      "Core Math",
@@ -1112,7 +1155,8 @@ st.html("""
 <div class="hero">
     <h1>⛰️ Excel Finance Functions Reference</h1>
     <p>
-        A practitioner's guide to <span class="gold">90+ essential Excel functions</span> for financial modelling —
+        A practitioner's guide to <span class="gold">90+ essential Excel functions</span> for
+        Financial Modelling, Financial Risk Management &amp; Financial Analytics —
         with real-world use cases, syntax, and error-avoidance tips.<br>
         Curated by <span class="gold">Prof. V. Ravichandran</span> · themountainpathacademy.com
     </p>
@@ -1141,6 +1185,7 @@ CAT_ICONS = {
     "Date & Time":    ("#E8F5E9", "#1B5E20"),
     "Financial":      ("#FCE4EC", "#880E4F"),
     "Statistical":    ("#E0F2F1", "#004D40"),
+    "Simulation":     ("#EDE7F6", "#4527A0"),
     "Text":           ("#FFF9C4", "#827717"),
     "Dynamic Arrays": ("#E8EAF6", "#283593"),
     "Error & Info":   ("#FFEBEE", "#B71C1C"),
@@ -1252,7 +1297,7 @@ if filtered.empty:
 else:
     # Group by category for display
     for cat in ["Core Math", "Conditional", "Lookup", "Date & Time", "Financial",
-                "Statistical", "Text", "Dynamic Arrays", "Error & Info", "Math Extras", "Info & Cell"]:
+                "Statistical", "Simulation", "Text", "Dynamic Arrays", "Error & Info", "Math Extras", "Info & Cell"]:
         group = filtered[filtered["category"] == cat]
         if group.empty:
             continue
