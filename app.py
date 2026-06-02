@@ -702,6 +702,14 @@ FUNCTIONS = [
         "tip": "⚠️ FORECAST.LINEAR assumes linearity. For seasonal data use FORECAST.ETS (exponential smoothing) instead.",
         "applications": ["FP&A"],
     },
+    {
+        "name": "LINEST", "category": "Statistical", "difficulty": "Advanced",
+        "syntax": "=LINEST(known_y's, [known_x's], [const], [stats])",
+        "description": "Returns a full set of regression statistics (slope, intercept, R², standard errors, F-statistic) for a linear model via array output. Must be entered as an array formula (Ctrl+Shift+Enter in legacy Excel; spills automatically in Excel 365).",
+        "use_case": "Valuations: Regress a company's historical revenue against GDP/CPI to build a macro-linked forecast; estimate beta from stock-return data without needing a dedicated stats package.",
+        "tip": "⚠️ Set [stats]=TRUE to get the full statistics block (R², F, df, SSreg, SSresid) — without it you only get slope and intercept. The output spills across multiple columns/rows so leave adjacent cells empty.",
+        "applications": ["Valuations", "FP&A"],
+    },
 
     # ── TEXT ──
     {
