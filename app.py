@@ -1163,6 +1163,80 @@ st.html("""
 </div>
 """)
 
+# ─── COURSE ANNOUNCEMENT BANNER ───────────────────────────────────────────────
+st.html("""
+<div style="
+    background: linear-gradient(135deg, #7B1FA2 0%, #4527A0 50%, #1565C0 100%);
+    border-radius: 14px;
+    padding: 22px 32px;
+    margin-bottom: 22px;
+    border: 1.5px solid rgba(232,184,75,0.55);
+    box-shadow: 0 6px 28px rgba(69,39,160,0.28);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+">
+    <!-- Pulse icon -->
+    <div style="flex-shrink:0;text-align:center;">
+        <div style="
+            width:52px;height:52px;border-radius:50%;
+            background:rgba(232,184,75,0.18);
+            border:2px solid #E8B84B;
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.6rem;
+        "></div>
+    </div>
+
+    <!-- Text block -->
+    <div style="flex:1;min-width:220px;">
+        <div style="
+            font-size:0.65rem;font-weight:800;letter-spacing:2px;
+            color:#E8B84B;text-transform:uppercase;margin-bottom:4px;
+        ">&#9679; Now Enrolling — Cohort Opens Mid-July 2026</div>
+        <div style="
+            font-family:'Playfair Display',serif;font-size:1.18rem;
+            color:#FFFFFF;font-weight:700;margin-bottom:6px;line-height:1.3;
+        ">Live Finance Courses at The Mountain Path Academy</div>
+        <div style="font-size:0.86rem;color:#C8D6F0;line-height:1.55;">
+            <span style="
+                background:rgba(232,184,75,0.18);border:1px solid rgba(232,184,75,0.4);
+                border-radius:20px;padding:2px 12px;font-weight:600;color:#E8B84B;
+                margin-right:8px;white-space:nowrap;
+            ">Applied Finance Through Excel</span>
+            <span style="
+                background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);
+                border-radius:20px;padding:2px 12px;font-weight:600;color:#D4E1FF;
+                white-space:nowrap;
+            ">Financial Analytics</span>
+            <div style="margin-top:7px;font-size:0.82rem;color:#A8BEDD;">
+                Hands-on. Practitioner-led. Built for analysts who want to move from theory to the real deal.
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA button -->
+    <div style="flex-shrink:0;text-align:center;">
+        <a href="https://themountainpathacademy.com" target="_blank" style="
+            display:inline-block;
+            background: linear-gradient(135deg, #C8962E 0%, #E8B84B 100%);
+            color: #0D1B3E;
+            font-weight: 800;
+            font-size: 0.82rem;
+            padding: 11px 22px;
+            border-radius: 25px;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 14px rgba(200,150,46,0.45);
+            white-space: nowrap;
+        ">Register Now &rarr;</a>
+        <div style="font-size:0.65rem;color:#A8BEDD;margin-top:5px;">
+            themountainpathacademy.com
+        </div>
+    </div>
+</div>
+""")
+
 # ─── STAT CHIPS ───────────────────────────────────────────────────────────────
 total = len(df)
 shown = len(filtered)
