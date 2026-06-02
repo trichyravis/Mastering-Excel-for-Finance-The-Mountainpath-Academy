@@ -7,10 +7,6 @@ Prof. V. Ravichandran | themountainpathacademy.com
 
 import streamlit as st
 import pandas as pd
-import io
-from openpyxl import Workbook
-from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
 
 # ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -877,143 +873,6 @@ CAT_TO_SHEET = {
     "Info & Cell":    "Information & Cell",
 }
 
-# ─── EXCEL GENERATOR ──────────────────────────────────────────────────────────
-def generate_excel(selected_cats: list) -> bytes:
-    wb = Workbook()
-    wb.remove(wb.active)
-
-    # ── Palette ──
-    NAVY    = "0D1B3E"
-    GOLD    = "C8962E"
-    SLATE   = "2C3E6B"
-    CREAM   = "F8F5EF"
-    WHITE   = "FFFFFF"
-    MUTED   = "8A94AB"
-    DIFF_FILL = {"Beginner": "E8F5E9", "Intermediate": "FFF3E0", "Advanced": "FCE4EC"}
-    DIFF_FONT = {"Beginner": "2E7D32", "Intermediate": "E65100", "Advanced": "880E4F"}
-
-    hdr_font  = Font(name="Calibri", bold=True, color=WHITE, size=10)
-    hdr_fill  = PatternFill(fill_type="solid", fgColor=NAVY)
-    hdr_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-    thin = Side(style="thin", color="DDE2ED")
-    border = Border(left=thin, right=thin, top=thin, bottom=thin)
-
-    def apply_header(ws, row, cols):
-        for c, val in enumerate(cols, 1):
-            cell = ws.cell(row=row, column=c, value=val)
-            cell.font = hdr_font
-            cell.fill = hdr_fill
-            cell.alignment = hdr_align
-            cell.border = border
-        ws.row_dimensions[row].height = 28
-
-    # ── Contents sheet ──
-    wc = wb.create_sheet(" Contents")
-    wc.sheet_view.showGridLines = False
-    wc.column_dimensions["A"].width = 4
-
-    wc["B2"] = "⛰️  The Mountain Path Academy"
-    wc["B2"].font = Font(name="Calibri", bold=True, size=16, color=NAVY)
-    wc.row_dimensions[2].height = 26
-
-    wc["B3"] = "Excel Finance Functions — Downloadable Reference"
-    wc["B3"].font = Font(name="Calibri", size=12, color=SLATE)
-    wc.row_dimensions[3].height = 18
-
-    wc["B4"] = "Prof. V. Ravichandran  |  themountainpathacademy.com  |  github.com/trichyravis"
-    wc["B4"].font = Font(name="Calibri", size=9, italic=True, color=MUTED)
-    wc.row_dimensions[4].height = 14
-
-    apply_header(wc, 6, ["#", "Category / Sheet", "Functions Included", "Count"])
-    wc.column_dimensions["B"].width = 5
-    wc.column_dimensions["C"].width = 26
-    wc.column_dimensions["D"].width = 68
-    wc.column_dimensions["E"].width = 8
-
-    for i, cat in enumerate(selected_cats, 1):
-        cat_fns = [f for f in FUNCTIONS if f["category"] == cat]
-        r = i + 6
-        wc.cell(r, 2, i).alignment = Alignment(horizontal="center")
-        wc.cell(r, 3, CAT_TO_SHEET.get(cat, cat)).font = Font(name="Calibri", bold=True, color=SLATE)
-        wc.cell(r, 4, "  ·  ".join(f["name"] for f in cat_fns))
-        wc.cell(r, 5, len(cat_fns)).alignment = Alignment(horizontal="center")
-        bg = CREAM if i % 2 == 0 else WHITE
-        for col in [2, 3, 4, 5]:
-            wc.cell(r, col).fill = PatternFill(fill_type="solid", fgColor=bg)
-            wc.cell(r, col).border = border
-            wc.cell(r, col).alignment = Alignment(vertical="center", wrap_text=True)
-        wc.row_dimensions[r].height = 18
-
-    # ── One sheet per category ──
-    HEADERS = ["Function", "Syntax", "Description", "Difficulty",
-               "Model Application", "Real-World Use Case", "⚠️ Error Avoidance Tip"]
-    COL_W   = [20, 36, 36, 14, 20, 50, 50]
-
-    for cat in selected_cats:
-        cat_fns = [f for f in FUNCTIONS if f["category"] == cat]
-        sheet_nm = CAT_TO_SHEET.get(cat, cat)[:31]
-        ws = wb.create_sheet(sheet_nm)
-        ws.sheet_view.showGridLines = False
-
-        # Title row
-        ws["A1"] = f"⛰️  {sheet_nm}  —  Excel Finance Functions"
-        ws["A1"].font = Font(name="Calibri", bold=True, size=13, color=NAVY)
-        ws.row_dimensions[1].height = 22
-        ws["A2"] = "The Mountain Path Academy  |  Prof. V. Ravichandran  |  themountainpathacademy.com"
-        ws["A2"].font = Font(name="Calibri", size=9, italic=True, color=MUTED)
-        ws.row_dimensions[2].height = 13
-
-        # Header
-        apply_header(ws, 4, HEADERS)
-        for i, w in enumerate(COL_W, 1):
-            ws.column_dimensions[get_column_letter(i)].width = w
-
-        # Data
-        for ri, fn in enumerate(cat_fns, 5):
-            alt = CREAM if ri % 2 == 0 else WHITE
-            vals = [fn["name"], fn["syntax"], fn["description"], fn["difficulty"],
-                    " | ".join(fn["applications"]), fn["use_case"], fn["tip"]]
-
-            for ci, val in enumerate(vals, 1):
-                cell = ws.cell(ri, ci, str(val) if val is not None else "")
-                cell.border = border
-                cell.alignment = Alignment(vertical="top", wrap_text=True)
-
-                if ci == 1:   # Function name
-                    cell.font = Font(name="Calibri", bold=True, size=11, color=NAVY)
-                    cell.fill = PatternFill(fill_type="solid", fgColor=alt)
-                elif ci == 2: # Syntax
-                    cell.font = Font(name="Courier New", size=9, color=SLATE)
-                    cell.fill = PatternFill(fill_type="solid", fgColor="EEF1F8")
-                elif ci == 4: # Difficulty
-                    dc = fn["difficulty"]
-                    cell.font = Font(name="Calibri", bold=True, size=9,
-                                     color=DIFF_FONT.get(dc, "000000"))
-                    cell.fill = PatternFill(fill_type="solid",
-                                            fgColor=DIFF_FILL.get(dc, alt))
-                    cell.alignment = Alignment(horizontal="center", vertical="top",
-                                               wrap_text=True)
-                elif ci == 6: # Use case
-                    cell.font = Font(name="Calibri", size=9, color=SLATE)
-                    cell.fill = PatternFill(fill_type="solid", fgColor="F0F4FF")
-                elif ci == 7: # Tip
-                    cell.font = Font(name="Calibri", size=9, color="5D4037")
-                    cell.fill = PatternFill(fill_type="solid", fgColor="FFFDE7")
-                else:
-                    cell.font = Font(name="Calibri", size=9)
-                    cell.fill = PatternFill(fill_type="solid", fgColor=alt)
-
-            ws.row_dimensions[ri].height = 58
-
-        ws.freeze_panes = "A5"
-        ws.auto_filter.ref = f"A4:{get_column_letter(len(HEADERS))}{4+len(cat_fns)}"
-
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
-    return buf.getvalue()
-
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.html("""
@@ -1029,69 +888,67 @@ with st.sidebar:
     <hr style='border-color:#2C3E6B; margin:4px 0 16px 0;'>
     """)
 
-    st.markdown("###  Search")
+    # ── Sidebar filter controls — all via st.html labels (no emoji markdown) ──
+    def sidebar_label(text):
+        st.html(f"""<div style='font-size:0.72rem;font-weight:700;color:#E8B84B;
+            text-transform:uppercase;letter-spacing:1.2px;margin:14px 0 5px 0;
+            padding-left:2px;border-left:3px solid #C8962E;padding-left:8px;'>
+            {text}</div>""")
+
+    sidebar_label("Search")
     search_query = st.text_input(
         "Function name or keyword",
-        placeholder="e.g. XNPV, depreciation, IRR…",
+        placeholder="e.g. XNPV, IRR, depreciation...",
         label_visibility="collapsed",
     )
 
-    st.markdown("###  Category")
+    sidebar_label("Category")
     categories = ["All"] + sorted(df["category"].unique().tolist())
     selected_cat = st.selectbox("Category", categories, label_visibility="collapsed")
 
-    st.markdown("###  Difficulty")
+    sidebar_label("Difficulty")
     difficulty_opts = ["All", "Beginner", "Intermediate", "Advanced"]
     selected_diff = st.selectbox("Difficulty", difficulty_opts, label_visibility="collapsed")
 
-    st.markdown("###  Model Application")
+    sidebar_label("Model Application")
     app_opts = ["All", "FP&A", "Valuations", "Reporting"]
     selected_app = st.selectbox("Application", app_opts, label_visibility="collapsed")
 
-    # ── Download section ──
-    st.html("<hr style='border-color:#2C3E6B; margin:16px 0 10px 0;'>")
-    st.markdown("###  Download Sheets")
-    dl_opts = ["All Sheets"] + ALL_CATS
-    dl_selection = st.multiselect(
-        "Pick sheets",
-        options=dl_opts,
-        default=["All Sheets"],
-        label_visibility="collapsed",
-    )
-    dl_cats = ALL_CATS if "All Sheets" in dl_selection else [c for c in ALL_CATS if c in dl_selection]
-    if dl_cats:
-        excel_bytes = generate_excel(dl_cats)
-        fname = "MPA_Finance_Functions_All.xlsx" if len(dl_cats) == len(ALL_CATS) \
-                else f"MPA_{dl_cats[0].replace(' ','_')}.xlsx"
-        st.download_button(
-            label=f"⬇️ Download  ({len(dl_cats)} sheet{'s' if len(dl_cats)>1 else ''})",
-            data=excel_bytes,
-            file_name=fname,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True,
-        )
-
     st.html("""
-    <hr style='border-color:#2C3E6B; margin:16px 0;'>
-    <div style='font-size:0.72rem; color:#6A7A9B; line-height:1.8;'>
-        <strong style='color:#E8B84B;'>Difficulty guide</strong><br>
-         Beginner — no prior formula knowledge needed<br>
-         Intermediate — comfortable with basic Excel<br>
-         Advanced — financial modelling experience required
+    <hr style='border-color:#2C3E6B; margin:18px 0 12px 0;'>
+    <div style='font-size:0.70rem; color:#8A9ABC; line-height:2;'>
+        <span style='color:#E8B84B;font-weight:700;'>Difficulty guide</span><br>
+        <span style='display:inline-block;width:8px;height:8px;border-radius:50%;
+              background:#27AE60;margin-right:6px;vertical-align:middle;'></span>
+        <span style='color:#C5D0E0;'>Beginner</span> — no prior formula knowledge<br>
+        <span style='display:inline-block;width:8px;height:8px;border-radius:50%;
+              background:#E67E22;margin-right:6px;vertical-align:middle;'></span>
+        <span style='color:#C5D0E0;'>Intermediate</span> — comfortable with Excel<br>
+        <span style='display:inline-block;width:8px;height:8px;border-radius:50%;
+              background:#C0392B;margin-right:6px;vertical-align:middle;'></span>
+        <span style='color:#C5D0E0;'>Advanced</span> — modelling experience needed
     </div>
     <hr style='border-color:#2C3E6B; margin:14px 0;'>
     <div style='text-align:center;'>
-        <div style='font-size:0.78rem; color:#E8B84B; font-weight:700; margin-bottom:4px;'>Prof. V. Ravichandran</div>
-        <div style='font-size:0.68rem; color:#6A7A9B; margin-bottom:10px;'>28+ yrs · Corporate Finance &amp; Banking</div>
-        <div style='display:flex; gap:8px; justify-content:center; flex-wrap:wrap;'>
-            <a style='display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.07);border:1px solid rgba(232,184,75,0.35);border-radius:20px;padding:5px 12px;font-size:0.70rem;font-weight:600;color:#E8B84B;text-decoration:none;'
+        <div style='font-size:0.78rem;color:#E8B84B;font-weight:700;margin-bottom:3px;'>
+            Prof. V. Ravichandran</div>
+        <div style='font-size:0.67rem;color:#6A7A9B;margin-bottom:12px;'>
+            28+ yrs · Corporate Finance &amp; Banking</div>
+        <div style='display:flex;gap:8px;justify-content:center;'>
+            <a style='display:inline-flex;align-items:center;gap:5px;
+               background:rgba(255,255,255,0.07);border:1px solid rgba(232,184,75,0.35);
+               border-radius:20px;padding:5px 12px;font-size:0.70rem;font-weight:600;
+               color:#E8B84B;text-decoration:none;'
                href='https://www.linkedin.com/in/trichyravis' target='_blank'>
                 <svg width='11' height='11' viewBox='0 0 24 24' fill='#E8B84B'>
                     <path d='M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z'/>
                 </svg>
                 LinkedIn
             </a>
-            <a style='display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.07);border:1px solid rgba(232,184,75,0.35);border-radius:20px;padding:5px 12px;font-size:0.70rem;font-weight:600;color:#E8B84B;text-decoration:none;'
+            <a style='display:inline-flex;align-items:center;gap:5px;
+               background:rgba(255,255,255,0.07);border:1px solid rgba(232,184,75,0.35);
+               border-radius:20px;padding:5px 12px;font-size:0.70rem;font-weight:600;
+               color:#E8B84B;text-decoration:none;'
                href='https://github.com/trichyravis' target='_blank'>
                 <svg width='11' height='11' viewBox='0 0 24 24' fill='#E8B84B'>
                     <path d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/>
@@ -1149,33 +1006,35 @@ st.html(f"""
 </div>
 """)
 
-# ─── CATEGORY ILLUSTRATION STRIP ─────────────────────────────────────────────
+# ─── CATEGORY STRIP (SVG icons, no emoji) ─────────────────────────────────────
 CAT_ICONS = {
-    "Core Math":      ("➕", "#EBF5FF", "#1565C0"),
-    "Conditional":    ("", "#FFF3E0", "#E65100"),
-    "Lookup":         ("", "#F3E5F5", "#6A1B9A"),
-    "Date & Time":    ("", "#E8F5E9", "#1B5E20"),
-    "Financial":      ("", "#FCE4EC", "#880E4F"),
-    "Statistical":    ("", "#E0F2F1", "#004D40"),
-    "Text":           ("", "#FFF9C4", "#827717"),
-    "Dynamic Arrays": ("⚡", "#E8EAF6", "#283593"),
-    "Error & Info":   ("️", "#FFEBEE", "#B71C1C"),
-    "Math Extras":    ("", "#F1F8E9", "#33691E"),
-    "Info & Cell":    ("", "#E0F7FA", "#006064"),
+    "Core Math":      ("#EBF5FF", "#1565C0"),
+    "Conditional":    ("#FFF3E0", "#E65100"),
+    "Lookup":         ("#F3E5F5", "#6A1B9A"),
+    "Date & Time":    ("#E8F5E9", "#1B5E20"),
+    "Financial":      ("#FCE4EC", "#880E4F"),
+    "Statistical":    ("#E0F2F1", "#004D40"),
+    "Text":           ("#FFF9C4", "#827717"),
+    "Dynamic Arrays": ("#E8EAF6", "#283593"),
+    "Error & Info":   ("#FFEBEE", "#B71C1C"),
+    "Math Extras":    ("#F1F8E9", "#33691E"),
+    "Info & Cell":    ("#E0F7FA", "#006064"),
 }
 
 icon_chips = "".join(
-    f'''<div style="display:inline-flex;align-items:center;gap:6px;background:{bg};
-        border:1px solid {col}33;border-radius:10px;padding:7px 13px;
+    f'''<div style="display:inline-flex;align-items:center;gap:7px;background:{bg};
+        border:1px solid {col}33;border-radius:10px;padding:7px 14px;
         font-size:0.78rem;font-weight:600;color:{col};white-space:nowrap;
         box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-        <span style="font-size:1rem;">{icon}</span>{cat}
+        <span style="display:inline-block;width:8px;height:8px;border-radius:2px;
+              background:{col};opacity:0.75;flex-shrink:0;"></span>
+        {cat}
         <span style="background:{col};color:#fff;border-radius:10px;
-              padding:0 6px;font-size:0.65rem;margin-left:2px;">
+              padding:1px 7px;font-size:0.65rem;margin-left:2px;font-weight:700;">
             {len(df[df["category"]==cat])}
         </span>
     </div>'''
-    for cat, (icon, bg, col) in CAT_ICONS.items()
+    for cat, (bg, col) in CAT_ICONS.items()
 )
 st.html(f"""
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;
@@ -1183,14 +1042,19 @@ st.html(f"""
      box-shadow:0 2px 8px rgba(0,0,0,0.05);">
   <div style="width:100%;font-size:0.72rem;font-weight:700;color:#8A94AB;
        text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px;">
-     Browse by Category
+    Browse by Category
   </div>
   {icon_chips}
 </div>
 """)
 
 # ─── RESULTS ──────────────────────────────────────────────────────────────────
-DIFF_EMOJI = {"Beginner": "", "Intermediate": "", "Advanced": ""}
+# CSS dot — no emoji, works cross-platform
+DIFF_DOT = {
+    "Beginner":     "<span style='display:inline-block;width:8px;height:8px;border-radius:50%;background:#27AE60;margin-right:5px;vertical-align:middle;'></span>",
+    "Intermediate": "<span style='display:inline-block;width:8px;height:8px;border-radius:50%;background:#E67E22;margin-right:5px;vertical-align:middle;'></span>",
+    "Advanced":     "<span style='display:inline-block;width:8px;height:8px;border-radius:50%;background:#C0392B;margin-right:5px;vertical-align:middle;'></span>",
+}
 APP_COLOUR  = {"FP&A": "#1565C0", "Valuations": "#880E4F", "Reporting": "#2E7D32"}
 
 if filtered.empty:
@@ -1209,10 +1073,10 @@ else:
         if group.empty:
             continue
 
-        st.html(f'<div class="section-header"> {cat}</div>')
+        st.html(f'<div class="section-header">{cat}</div>')
 
         for _, row in group.iterrows():
-            diff_badge = f'<span class="cat-badge diff-{row["difficulty"]}">{DIFF_EMOJI[row["difficulty"]]} {row["difficulty"]}</span>'
+            diff_badge = f'<span class="cat-badge diff-{row["difficulty"]}">{DIFF_DOT[row["difficulty"]]}{row["difficulty"]}</span>'
             app_tags   = " ".join(
                 f'<span class="tag" style="background:{APP_COLOUR[a]}22;color:{APP_COLOUR[a]};border:1px solid {APP_COLOUR[a]}44;">{a}</span>'
                 for a in row["applications"]
